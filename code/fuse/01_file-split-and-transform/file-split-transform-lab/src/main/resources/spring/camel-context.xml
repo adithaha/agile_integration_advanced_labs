@@ -24,5 +24,28 @@
              Step 2 : Dozer transformation of Customer to Account
              Step 3 : Java to Json conversion using json jackson
         -->
+        <route id="_route1">
+            <from id="_from1" uri="file:src/data/inbox?fileName=customers.csv&amp;noop=true"/>
+            <onException id="_onException1">
+                <exception>java.lang.IllegalArgumentException</exception>
+                <handled>
+                    <constant>true</constant>
+                </handled>
+                <to id="_to2" uri="file:src/data/error?fileName=csv-record-${date:now:yyyyMMdd}.txt"/>
+            </onException>
+            <log id="_log1" message="reading file..."/>
+            <split id="_split1">
+                <tokenize token="\n"/>
+                <unmarshal id="_unmarshal1">
+                    <bindy classType="org.acme.Customer" type="Csv"/>
+                </unmarshal>
+                <to id="_to3" uri="dozer:transformOrder?mappingFile=transformation.xml&amp;targetModel=org.globex.Account"/>
+                <marshal id="_marshal1">
+                    <json library="Jackson"/>
+                </marshal>
+                <to id="_to1" uri="file:src/data/outbox?fileName=account-${property.CamelSplitIndex}.json"/>
+            </split>
+            <log id="_log3" message="processing file completed"/>
+        </route>
     </camelContext>
 </beans>

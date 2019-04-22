@@ -1,9 +1,12 @@
 package org.acme;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
 import org.apache.camel.dataformat.bindy.annotation.DataField;
 
 @CsvRecord(separator = ",")
+@XmlRootElement
 public class Customer {
 
     @DataField(pos = 1)
