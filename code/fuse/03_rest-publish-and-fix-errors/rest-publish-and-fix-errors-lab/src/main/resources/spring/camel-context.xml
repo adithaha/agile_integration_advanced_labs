@@ -1,9 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright 2014-2017, Red Hat, Inc. and/or its affiliates, and individual
+    contributors by the @authors tag. 
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<!-- Configures the Camel Context-->
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:camel="http://camel.apache.org/schema/spring"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
-    <!-- Define a traditional camel context here -->
-    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
-        <propertyPlaceholder id="properties" location="route.properties"/>
+    <camelContext id="_camelContext1" xmlns="http://camel.apache.org/schema/spring">
+        <propertyPlaceholder id="properties" location="fabric8/route.properties"/>
+        <restConfiguration bindingMode="off" component="servlet"
+            contextPath="/rest" host="localhost"/>
+        <rest id="rest-85573017-0ed3-41c5-9467-31d1f6884ce0" path="/service">
+            <post id="9535c367-8b21-4b21-b4ca-76b84aa53808" uri="/customers">
+                <to uri="amqp:queue:inputQueue"/>
+            </post>
+        </rest>
+        <!--
+             Transformation Endpoint doing csv2java conversion
+             Step 1 : csv record is converted java using camel bindy
+             Step 2 : Dozer transformation of Customer to Account
+             Step 3 : Java to Json conversion using json jackson
+        -->
+        <route id="_route1">
+            <from id="_from1" uri="amqp:queue:inputQueue"/>
+            <onException id="_onException1">
+                <exception>java.lang.IllegalArgumentException</exception>
+                <handled>
+                    <constant>true</constant>
+                </handled>
+                <log id="_log4" message="exception: ${property.CamelExceptionCaught}"/>
+                <bean id="_bean1" method="composeTError" ref="myTransformer"/>
+                <marshal id="_marshal2">
+                    <json library="Jackson"/>
+                </marshal>
+                <to id="_to2" pattern="InOnly" uri="amqp:topic:errorNotification"/>
+            </onException>
+            <log id="_log1" message="reading from inputQueue..."/>
+            <split id="_split1">
+                <tokenize token=";"/>
+                <unmarshal id="_unmarshal1">
+                    <bindy classType="org.acme.Customer" type="Csv"/>
+                </unmarshal>
+                <to id="_to3" uri="dozer:transformOrder?mappingFile=transformation.xml&amp;targetModel=org.globex.Account"/>
+                <marshal id="_marshal1">
+                    <json library="Jackson"/>
+                </marshal>
+                <log id="_log2" message="processing data \n ${body}"/>
+                <to id="_to1" pattern="InOnly" uri="amqp:queue:accountQueue"/>
+            </split>
+            <log id="_log3" message="processing file completed"/>
+            <setBody id="_setBody1">
+                <constant>Processed the customer data</constant>
+            </setBody>
+        </route>
+        <route id="_route2">
+            <from id="_from2" uri="amqp:topic:errorNotification"/>
+            <unmarshal id="_unmarshal2">
+                <json library="Jackson" unmarshalTypeName="com.redhat.training.gpte.springboot.model.TError"/>
+            </unmarshal>
+            <log id="_log5" message="hello ${body}"/>
+            <to id="_to4" uri="jpa://com.redhat.training.gpte.springboot.model.TError"/>
+        </route>
+        <route id="_route3">
+            <from id="_from3" uri="jpa://com.redhat.training.gpte.springboot.model.TError?query=select o from com.redhat.training.gpte.springboot.model.TError o where o.status = 'FIXED'&amp;maximumResults=1&amp;delay=5s"/>
+            <script id="_script1">
+                <simple>${body.setStatus('CLOSED')}</simple>
+            </script>
+            <setBody id="_setBody2">
+                <simple>${body.message}</simple>
+            </setBody>
+            <log id="_log6" message="send fixed data \n ${body}"/>
+            <to id="_to5" pattern="InOnly" uri="amqp:queue:inputQueue"/>
+        </route>
     </camelContext>
 </beans>

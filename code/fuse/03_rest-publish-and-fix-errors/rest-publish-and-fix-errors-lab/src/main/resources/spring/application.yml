@@ -7,4 +7,3 @@ camel:
       mapping:
         enabled: true
         context-path: /rest/*
-

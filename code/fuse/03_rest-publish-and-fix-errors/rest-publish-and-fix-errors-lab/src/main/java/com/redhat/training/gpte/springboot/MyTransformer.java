@@ -16,7 +16,12 @@
  */
 package com.redhat.training.gpte.springboot;
 
+import org.apache.camel.Body;
+import org.apache.camel.Exchange;
+import org.apache.camel.ExchangeProperty;
 import org.springframework.stereotype.Component;
+
+import com.redhat.training.gpte.springboot.model.TError;
 
 /**
  * A sample transform
@@ -33,6 +38,16 @@ public class MyTransformer {
             buffer.append(letter);
         }
         return buffer.toString();
+    }
+    
+    public TError composeTError(@Body String message, @ExchangeProperty(Exchange.EXCEPTION_CAUGHT) String exMessage) {
+    	TError tError = new TError();
+    	tError.setErrorCode(111);
+    	tError.setErrorMessage(exMessage);
+    	tError.setMessage(message);
+    	tError.setStatus("ERROR");
+    	
+    	return tError;
     }
 
 }
