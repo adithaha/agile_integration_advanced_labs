@@ -8,13 +8,10 @@
   <name>Agile Integration :: Fuse :: Spring-Boot :: Camel XML :: REST-SOAP Application Bridge</name>
   <description>Spring Boot Fuse application running a Camel route defined in XML exposing REST API to connect to legacy SOAP service back end.</description>
   <properties>
-    <!-- configure the versions you want to use here -->
-    <fabric8.version>3.0.11.fuse-000039-redhat-1</fabric8.version>
     <spring-boot.version>1.5.12.RELEASE</spring-boot.version>
-
-    <!-- maven plugin versions -->
-    <fabric8.maven.plugin.version>3.5.33.fuse-000067-redhat-1</fabric8.maven.plugin.version>
+    <fabric8.version>3.0.11.fuse-000039-redhat-1</fabric8.version>
     <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
+    <fabric8.maven.plugin.version>3.5.33.fuse-000067-redhat-1</fabric8.maven.plugin.version>
     <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
   </properties>
   <dependencyManagement>
@@ -29,7 +26,6 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
-  
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
@@ -38,32 +34,23 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.jboss.spec.javax.ws.rs</groupId>
       <artifactId>jboss-jaxrs-api_2.0_spec</artifactId>
       <version>1.0.0.Final-redhat-1</version>
     </dependency>
-
-  <!--  Manually added dependencies for REST -->
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-cxf</artifactId>
     </dependency>
-
-
-    <!-- Camel -->
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-spring-boot-starter</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-rest-swagger-starter</artifactId>
     </dependency>
-
-
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-swagger-java-starter</artifactId>
@@ -75,8 +62,12 @@
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-jackson-starter</artifactId>
-    </dependency>    
-   
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-jetty</artifactId>
+      <version>2.21.0.fuse-710018-redhat-00001</version>
+    </dependency>
   </dependencies>
   <repositories>
     <repository>
