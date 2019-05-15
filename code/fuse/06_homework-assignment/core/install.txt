@@ -1,12 +1,3 @@
-JBoss Fuse
-—————
-
-# unzip file homework
-unzip homework.zip
-
-# go to homework directory
-cd 06_homework-assignment
-
 # go to parent project and install
 cd parent
 mvn clean install
