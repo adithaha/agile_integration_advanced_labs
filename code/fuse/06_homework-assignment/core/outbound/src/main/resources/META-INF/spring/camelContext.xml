@@ -19,8 +19,28 @@
     <osgi:reference id="activemqService" interface="org.apache.camel.Component"/>
     <camelContext id="outboundSOAP" trace="false" xmlns="http://camel.apache.org/schema/spring">
         <propertyPlaceholder id="myPropertyPlaceholder" location="ref:outboundProps"/>
+        <dataFormats>
+            <!-- <soapjaxb contextPath="com.sun.mdm.index.webservice"
+                elementNameStrategyRef="serviceStrategy" id="nextgateFormat"/> -->
+            <jaxb contextPath="com.sun.mdm.index.webservice"
+                id="jaxbExecuteMatchUpdate" partClass="com.sun.mdm.index.webservice.ExecuteMatchUpdate"/>
+        </dataFormats>
         <!-- stream caching has to be enabled to process the message and log it from cxf -->
+        <onException id="_onException1">
+            <exception>java.net.ConnectException</exception>
+            <redeliveryPolicy maximumRedeliveries="3" redeliveryDelay="0"/>
+            <to id="_to2" uri="activemqService:queue:q.empi.nextgate.dlq"/>
+        </onException>
         <route id="sendToNextGate" streamCache="true">
+            <from id="_from1" uri="activemqService:queue:q.empi.nextgate.out"/>
+            <unmarshal id="_unmarshal1">
+                <jaxb contextPath="com.sun.mdm.index.webservice"/>
+            </unmarshal>
+            <marshal id="_marshal1">
+                <soapjaxb contextPath="com.sun.mdm.index.webservice"/>
+            </marshal>
+            <to id="_to1" uri="{{nextgate.url}}"/>
+            <log id="_log3" message="response: \n ${body}"/>
         </route>
     </camelContext>
 </beans>

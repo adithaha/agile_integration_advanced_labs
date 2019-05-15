@@ -1,0 +1,38 @@
+JBoss Fuse
+—————
+
+# unzip file homework
+unzip homework.zip
+
+# go to homework directory
+cd 06_homework-assignment
+
+# go to parent project and install
+cd parent
+mvn clean install
+
+# go to core project and install
+cd ../core
+mvn clean install
+
+# download unzip jboss-fuse-full-6.2.1.redhat-084.zip first
+# then install and start jboss fuse
+unzip jboss-fuse-full-6.2.1.redhat-084.zip
+cd jboss-fuse-6.2.1.redhat-084/bin/
+./fuse
+
+# entering fuse console
+# deploy application
+
+# create fabric
+fabric:create --wait-for-provisioning --clean --new-user admin --new-user-password admin --new-user-role admin --resolver manualip --manual-ip 127.0.0.1
+
+# create homework profile
+profile-create --parent jboss-fuse-full homework
+profile-edit --repository mvn:com.customer.app/customer-features/1.0-SNAPSHOT/xml/features homework
+profile-edit --feature customer-features homework
+
+# apply homework profile to root container
+container-add-profile root homework
+
+
