@@ -1,7 +1,16 @@
-# download JBoss Fuse 6.2.1
+Aditya Nugraha
+anugraha@redhat.com
+
+
+###################################
+# STEP 1: download JBoss Fuse 6.2.1
+###################################
 # https://developers.redhat.com/download-manager/file/jboss-fuse-6.2.1.GA-full_zip.zip
+# put the zip file inside 06_homework-assignment directory
 
-
+###################################
+# STEP 2: build application
+###################################
 # go to parent project and install
 cd parent
 mvn clean install
@@ -11,18 +20,23 @@ cd ../core
 mvn clean install -DskipTests=true
 
 
-# then install and start jboss fuse
+###################################
+# STEP 3: Install JBoss Fuse
+###################################
 cd ..
 unzip jboss-fuse-full-6.2.1.redhat-084.zip
 cd jboss-fuse-6.2.1.redhat-084/bin/
 ./fuse
 
-# entering fuse console
-# deploy application
+# this will enter fuse console
 
-# create fabric
+# run command below in fuse console to install fabric
 fabric:create --wait-for-provisioning --clean --new-user admin --new-user-password admin --new-user-role admin --resolver manualip --manual-ip 127.0.0.1
 
+
+###################################
+# STEP 4: Deploy application
+###################################
 # create homework profile
 profile-create --parent jboss-fuse-full homework
 profile-edit --repository mvn:com.customer.app/customer-features/1.0-SNAPSHOT/xml/features homework
@@ -35,6 +49,9 @@ container-add-profile root homework
 log:tail
 
 
+###################################
+# STEP 5: Test
+###################################
 # test application, there are 2 scenario, restMatchTest and restNoMatchTest
 # open new terminal tab, go to homework folder
 cd core/inbound
